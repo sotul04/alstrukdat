@@ -68,7 +68,7 @@ long TIMEToDetik (TIME T){
 /* Diberikan sebuah TIME, mengkonversi menjadi jumlah detik dari pukul 0:0:0 */
 /* Rumus : detik = 3600*HH + 60*MM + SS */
 /* Nilai maksimum = 3600*23+59*60+59 */
-	return (Hour(T)*3600+Minute(T)*60+Second(T))%86400;
+	return (Hour(T)*3600+Minute(T)*60+Second(T)+86400)%86400;
 }
 
 TIME DetikToTIME (long N){ 
@@ -76,6 +76,9 @@ TIME DetikToTIME (long N){
 /* Catatan: Jika N >= 86400, maka harus dikonversi dulu menjadi jumlah detik yang 
    mewakili jumlah detik yang mungkin dalam 1 hari, yaitu dengan rumus: 
    N1 = N mod 86400, baru N1 dikonversi menjadi TIME */
+	while (N < 0){
+		N += 86400;
+	}
 	N %= 86400;
 	TIME time;
 	Hour(time) = N/3600; N%=3600;
@@ -120,13 +123,17 @@ TIME NextNDetik (TIME T, int N){
 }
 TIME PrevDetik (TIME T){
 /* Mengirim 1 detik sebelum T dalam bentuk TIME */
-	long t = TIMEToDetik(T)-1;
+	long t = (TIMEToDetik(T)-1+86400)%86400;
 	TIME time = DetikToTIME(t);
 	return time;
 }
 TIME PrevNDetik (TIME T, int N){
 /* Mengirim N detik sebelum T dalam bentuk TIME */
-	long t = TIMEToDetik(T)-N;
+	long t = (TIMEToDetik(T)-N);
+	while (t < 0){
+		t += 86400;
+	}
+	t %= 86400;
 	TIME time = DetikToTIME(t);
 	return time;
 }
@@ -134,5 +141,7 @@ TIME PrevNDetik (TIME T, int N){
 long Durasi (TIME TAw, TIME TAkh){
 /* Mengirim TAkh-TAw dlm Detik, dengan kalkulasi */
 /* Jika TAw > TAkh, maka TAkh adalah 1 hari setelah TAw */
-	return (TIMEToDetik(TAkh)-TIMEToDetik(TAw))%86400;
+	long collectTime = TIMEToDetik(TAkh) - TIMEToDetik(TAw);
+	collectTime = (collectTime+86400)%86400;
+	return collectTime;
 }
